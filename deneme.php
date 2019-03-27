@@ -1,3 +1,35 @@
+<!--
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.0.9/css/all.css'>
+  <link rel="stylesheet" href="css/upstyle.css">
+  
+</head>
+
+
+
+
+ 
+      <div class="phone-footer">
+          <input type="file"
+          name="file"
+          id="file"
+          class="inputfile"
+          @change="fileUpload"
+          v-model="fileInput"
+          :disabled="step !== 1"/>
+          <label for="file">
+            <i class="far fa-plus-square fa-lg"></i>
+          </label>
+        </div>
+   
+</html>
+-->
+
 <!DOCTYPE html>
 <html lang="en" >
 
@@ -10,7 +42,7 @@
 <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.0.9/css/all.css'>
 <link rel='stylesheet' href='https://cssgram-cssgram.netdna-ssl.com/cssgram.min.css'>
 
-      <link rel="stylesheet" href="css/style.css">
+      <link rel="stylesheet" href="css/upstyle.css">
 
   
 </head>
@@ -78,17 +110,10 @@
       </div>
     </div>
   </div>
-  <div class="details">
-    <a class="button is-primary is-small is-info" v-if="!showDetails" @click="showDetails = !showDetails">Details</a>
-    <ul v-else>
-      <li>Navigate the feed by <span>dragging (or scrolling)</span></li>
-      <li>Upload an image with <span><i class="far fa-plus-square fa-lg"></i></span></li>
-      <li>Like a post with <span><i class="far fa-heart fa-lg"></i></span> or <span>double clicking an image</span></li>
-    </ul>
-  </div>
-  <a href="https://twitter.com/djirdehh" target="_blank" class="twitter-section">
-    <i class="fab fa-twitter" aria-hidden="true"></i>
-  <a>
+
+>
+
+ 
 </div>
 
 <!--  Prefetch random images -->

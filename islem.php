@@ -1,5 +1,6 @@
 <?php 
-
+ob_start();
+session_start();
 include 'baglan.php';
 
 
@@ -78,13 +79,14 @@ if (isset($_POST['giris'])) {
 		'password' => $password,
 		
 	));
+	$girisResponse=$giris->fetch(PDO :: FETCH_ASSOC);
 	$girissayac=$giris->rowCount();
 	if($girissayac==1){	
 
-		//$_SESSION['kullanici_id']=$kullanicigiriscek['kullanici_id'];
-echo "Başarılı Giriş";
-		//header("Location:");
-		//exit();
+		$_SESSION['id']=$girisResponse['id'];
+		$id=$_SESSION['id'];
+		header("Location:profil.php");
+		exit();
 
 	}
 
@@ -96,4 +98,57 @@ echo "Başarılı Giriş";
 
 }
 
+if (isset($_FILES['dosya'])) {
+
+	if (!empty($_FILES)) {
+		$hata = $_FILES['dosya']['error'];
+		if($hata != 0) {
+			Header("Location:profil.php?durum=no1");
+			exit();
+		} else {
+			$name = $_FILES['dosya']["name"];
+			$benzersizsayi1=rand(20000,32000);
+			$benzersizsayi2=rand(20000,32000);
+			$benzersizad=$benzersizsayi1.$benzersizsayi2;
+
+			$dizin = 'posts/';
+			$yuklenecek_dosya = $dizin .$benzersizad. basename($_FILES['dosya']['name']);
+
+			if (move_uploaded_file($_FILES['dosya']['tmp_name'], $yuklenecek_dosya))
+			{
+				$id=$_SESSION['id'];
+
+				$kullanici_fotoyol="/".$benzersizad.$name;
+
+				
+				$insert=$db -> prepare("INSERT INTO posts (user_id,img) 
+
+					VALUES ( '$id' ,'$kullanici_fotoyol')");
+				$insertPosts=$insert -> execute(array(
+				));
+
+				if($insert){
+					Header("Location:profil.php?durum=yes");
+					exit();
+				}else{
+					Header("Location:profil.php?durum=no2");
+					exit();
+				}
+
+			} else {
+				Header("Location:profil.php?durum=no3");
+				exit();
+			}
+
+		}
+	}
+}
+
+
+
+
+
+
+
 ?>
+
