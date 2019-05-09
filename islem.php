@@ -9,16 +9,15 @@ if (isset($_POST ['register'])) {
 	$email=($_POST['email']);
 	$name=($_POST['name']);
 	$surname=($_POST['surname']);
-	$userName=($_POST['userName']);
+	$username=($_POST['username']);
 	$password=($_POST['password']);
 	$password_tekrar=($_POST['password_tekrar']);
 
 
-
-	$register=$db->prepare("select * from user where email=:email or userName=:userName");
+	$register=$db->prepare("select * from user where email=:email or username=:username");
 	$register->execute(array(
 		'email' => $email,
-		'userName' => $userName,
+		'username' => $username,
 	));
 
 	$say=$register->rowCount();
@@ -33,7 +32,7 @@ if (isset($_POST ['register'])) {
 			email=:email,
 			name=:name,
 			surname=:surname,
-			userName=:userName,
+			username=:username,
 			password=:password
 
 			");
@@ -41,7 +40,7 @@ if (isset($_POST ['register'])) {
 			'email' => $email,
 			'name' => $name,
 			'surname' => $surname,
-			'userName' => $userName,
+			'username' => $username,
 			'password' => $password,
 
 		));
@@ -62,10 +61,7 @@ if (isset($_POST ['register'])) {
 		exit();
 	}
 
-
-
 }
-
 
 if (isset($_POST['giris'])) {
 
@@ -82,9 +78,8 @@ if (isset($_POST['giris'])) {
 	$girisResponse=$giris->fetch(PDO :: FETCH_ASSOC);
 	$girissayac=$giris->rowCount();
 	if($girissayac==1){	
-
 		$_SESSION['id']=$girisResponse['id'];
-		$id=$_SESSION['id'];
+
 		header("Location:profil.php");
 		exit();
 
@@ -98,57 +93,128 @@ if (isset($_POST['giris'])) {
 
 }
 
-if (isset($_FILES['dosya'])) {
 
-	if (!empty($_FILES)) {
-		$hata = $_FILES['dosya']['error'];
-		if($hata != 0) {
-			Header("Location:profil.php?durum=no1");
+
+if (isset($_POST['kaydet'])) {
+	$id=$_SESSION['id'];
+
+	$img = $_FILES['dosya']["name"];
+	$benzersizsayi1=rand(20000,32000);
+	$benzersizsayi2=rand(20000,32000);
+	$benzersizad=$benzersizsayi1.$benzersizsayi2;
+
+	$dizin = 'img/';
+	$yuklenecek_dosya = $dizin .$benzersizad .basename($_FILES['dosya']['name']);
+	$kullanici_fotoyol="/".$benzersizad.$img;
+
+	if (move_uploaded_file($_FILES['dosya']['tmp_name'], $yuklenecek_dosya))
+	{
+		$guncelle=$db->prepare("UPDATE user SET 
+			name=:name,
+			surname=:surname,
+			email=:email,
+			bio=:bio,
+			img=:img
+			WHERE id=$id");
+		$update=$guncelle->execute(array(
+			'name' => $_POST['name'],
+			'surname' => $_POST['surname'],
+			'email' => $_POST['email'],
+			'bio' => $_POST['bio'],
+			'img'=> $kullanici_fotoyol,
+
+		));
+		if($update){
+			Header("Location:profil.php");
 			exit();
-		} else {
-			$name = $_FILES['dosya']["name"];
-			$benzersizsayi1=rand(20000,32000);
-			$benzersizsayi2=rand(20000,32000);
-			$benzersizad=$benzersizsayi1.$benzersizsayi2;
-
-			$dizin = 'posts/';
-			$yuklenecek_dosya = $dizin .$benzersizad. basename($_FILES['dosya']['name']);
-
-			if (move_uploaded_file($_FILES['dosya']['tmp_name'], $yuklenecek_dosya))
-			{
-				$id=$_SESSION['id'];
-
-				$kullanici_fotoyol="/".$benzersizad.$name;
-
-				
-				$insert=$db -> prepare("INSERT INTO posts (user_id,img) 
-
-					VALUES ( '$id' ,'$kullanici_fotoyol')");
-				$insertPosts=$insert -> execute(array(
-				));
-
-				if($insert){
-					Header("Location:profil.php?durum=yes");
-					exit();
-				}else{
-					Header("Location:profil.php?durum=no2");
-					exit();
-				}
-
-			} else {
-				Header("Location:profil.php?durum=no3");
-				exit();
-			}
+		}else{
+			Header("Location:profil.php?error_code=02");
+			exit();
 
 		}
+
+	}
+	else  {
+		$guncelle=$db->prepare("UPDATE user SET 
+			name=:name,
+			surname=:surname,
+			email=:email,
+			bio=:bio
+
+			WHERE id=$id");
+		$update=$guncelle->execute(array(
+			'name' => $_POST['name'],
+			'surname' => $_POST['surname'],
+			'email' => $_POST['email'],
+			'bio' => $_POST['bio'],
+			
+
+		));
+		if($update){
+			Header("Location:profil.php");
+			exit();
+		}else{
+			Header("Location:profil.php?error_code=02");
+			exit();
+
+		}
+	}
+
+}
+
+if (isset($_POST['unf'])) {
+
+	$target_id= $_POST['target_id'];
+
+	$unfollow=$db->prepare("DELETE FROM follow where user_id=:user_id and target_id=:target_id");
+	$unfollow -> execute(array(
+		'user_id' => $_POST['user_id'],
+		'target_id' => $_POST['target_id']
+		
+	));
+
+	if($unfollow){	
+		header("Location:profils.php?id=$target_id");
+		exit();
+
+	}
+
+	else{
+		
+		header("Location:login.php?id=hata");
+		exit();
 	}
 }
 
 
+if (isset($_POST['follow'])) {
+	$target_id= $_POST['target_id'];
 
 
+	$follow=$db->prepare("INSERT INTO follow SET
 
+		user_id=:user_id,
+		target_id=:target_id
+
+		");
+	$insert=$follow->execute(array(
+		'user_id' => $_POST['user_id'],
+		'target_id' => $_POST['target_id'],
+		
+
+	));
+
+	if ($insert) {
+		header("Location:profils.php?id=$target_id");
+		exit();
+	}
+	else{
+		header("Location:profil.php?error_code=02");
+		exit();
+	}
+}
 
 
 ?>
+
 

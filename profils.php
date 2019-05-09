@@ -5,54 +5,56 @@ include 'baglan.php';
 include 'header.php';
 $user=$db -> prepare("SELECT * FROM user WHERE id=:id");
 $user -> execute(array(
-	'id' => $_SESSION['id'],
+	'id' => $_GET['id'],
 ));
-
 $userResponse = $user -> fetch(PDO::FETCH_ASSOC);
 
-$oneri=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id =:id");
+$oneri=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id=:id )");
 $oneri -> execute(array(
-	'id'=> $_SESSION['id'],
+	'id'=> $_GET['id'],
 ));
 
-$oneriall=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id=:id)");
+$oneriall=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id=:id )");
 $oneriall -> execute(array(
-	'id'=> $_SESSION['id'],
+	'id'=>$_GET['id'],
 ));
 
 $posts=$db -> prepare("SELECT * FROM posts WHERE user_id=:id");
 $posts -> execute(array(
-	'id' => $_SESSION['id'],
+	'id' => $_GET['id'],
 ));
 
 $countposts=$db -> prepare("SELECT count(*) as gonderi FROM posts WHERE user_id=:id");
 $countposts -> execute(array(
-	'id' => $_SESSION['id'],
+	'id' => $_GET['id'],
 ));
 $CountResponse = $countposts -> fetch(PDO::FETCH_ASSOC);
 
-$follow = $db -> prepare ("SELECT count(*) as follow FROM follow WHERE user_id =:id ");
+$follow = $db -> prepare ("SELECT user_id,count(*) as follow FROM follow WHERE user_id =:id ");
 $follow -> execute(array(
-	'id' =>$_SESSION['id'], 
+	'id' =>$_GET['id'], 
 ));
 $followRes = $follow -> fetch(PDO::FETCH_ASSOC);
 
 $followers = $db -> prepare ("SELECT count(*) as followers FROM follow WHERE target_id =:id ");
 $followers -> execute(array(
-	'id' =>$_SESSION['id'], 
+	'id' =>$_GET['id'], 
 ));
 $followersRes = $followers -> fetch(PDO::FETCH_ASSOC);
 
-$listfollow=$db->prepare("SELECT * from user,follow WHERE target_id=:id and follow.user_id=user.id ");
-$listfollow -> execute(array(
-	'id' =>$_SESSION['id'], 
+$followme=$db->prepare("SELECT * from follow WHERE target_id=:id and user_id=:user_id ");
+$followme -> execute(array(
+	'id' =>$_GET['id'],
+	'user_id'=>$_SESSION['id']
 ));
-
+$followmeResp = $followme -> fetch(PDO::FETCH_ASSOC);
 
 ?>
 
 <form id="form" action="islem.php" method="POST" enctype="multipart/form-data">
-
+	<?php if ($_GET['id']==$_SESSION['id']) {
+		header("location:profil.php");
+	} ?>
 	<div>
 		<div class="container container-insta">
 			<div class="row t-p-15 b-p-15 bg-light-gray b-border-gray">
@@ -81,7 +83,7 @@ $listfollow -> execute(array(
 					<div class="o-hidden txt-hover-blue decor-none m-auto text-center profil-photo border-50">
 
 						<figure class="">
-							<img src="img<?php echo  $userResponse['img'] ?>" alt="bird" class="img-responsive">
+							<img src="img<?php echo  $userResponse['img'] ?>"  class="img-responsive">
 						</figure>
 
 					</div>
@@ -99,51 +101,63 @@ $listfollow -> execute(array(
 								<div class="col-md-4 col-xs-4 col-sm-4 text-center">
 
 									<span class="pointer" data-toggle="modal" data-target=".followers" >
-										<span  class="block lato fs-profil-num"><strong><?php echo $followersRes['followers']?></strong></span>
+										<span class="block lato fs-profil-num"><strong><?php echo $followersRes['followers']?></strong></span>
 										<span class="block txt-gray fs-profil-txt pointer" >Takipçi</span>
 									</span>
 
 								</div>
-								<div class="col-md-4 col-xs-4 col-sm-4 text-center" >
-									<a  href="following.php?id=<?php echo $_SESSION['id'] ?>"  >
+								<div class="col-md-4 col-xs-4 col-sm-4 text-center">
+									<a href="following.php?id=<?php echo $_GET['id'] ?>">
 										<span class="pointer" data-toggle="modal">
-											<span style="color: black;" class="block lato fs-profil-num"><strong><?php echo $followRes['follow'] ?></strong></span>
+											<span style="color:black;" class="block lato fs-profil-num"><strong><?php echo $followRes['follow'] ?></strong></span>
 											<span class="block txt-gray fs-profil-txt pointer">Takip</span>
 										</span>
 									</a>
 								</div>
 							</div>
-							<div class="row profil-top-p">
 
-								<div class="col-md-8 col-xs-6 text-center decor-none txt-hover-black h-30 r-p-0 message-div ">
-									<a href="editprofile.php" class="block b-gray border-5 t-p-5 b-p-5">
-										<strong class="txt-black">Profil Düzenle</strong>
-									</a>
-								</div>
+							<?php 	if ( $followmeResp) {?>
 
-								<?php if ($_SESSION['id']!= $userResponse['id']){ ?>
+								<div class="row profil-top-p">
+									<div class="col-md-8 col-xs-6 text-center decor-none txt-hover-black h-30 r-p-0 message-div ">
 
-									<div class="col-md-2 col-xs-3 text-center decor-none txt-hover-black h-30 l-p-0 r-p-0 l-p-5 r-p-5 user-check-div">
-										<span href="#" class="txt-black block b-gray border-5 t-p-5 b-p-5 pointer user-check" data-toggle="modal" data-target="#unf-modal">
-											<i class="far fa-user f-s-16"></i>
-										</span>
+
+										<input type="hidden" name="target_id" value="<?php echo $_GET['id'] ?>">
+										<input type="hidden" name="user_id" value="<?php echo $_SESSION['id'] ?>">
+										<input type="hidden" name="unf">
+										<div style="color:black;" class="block b-gray border-5 t-p-5 b-p-5  txt-hover-white" onclick="document.getElementById('form').submit();">Takip Ediliyor</div>
+
+										
 									</div>
 
-								<?php } ?>
-<!--
-								<div class="col-md-2 col-xs-3 text-center h-30 l-p-0">
-									<span class="block b-gray border-5 t-p-5 txt-black txt-hover-black b-p-5 pointer down">
-										<i class="fas fa-caret-down f-s-16 txt-black" ></i>
-									</span>
 								</div>
-							-->
+
+							<?php } else { ?>
+
+								<div class="row profil-top-p">
+									<div class="col-md-8 col-xs-6 text-center decor-none txt-hover-black h-30 r-p-0 message-div ">
+
+										<input type="hidden" name="target_id" value="<?php echo $_GET['id'] ?>">
+										<input type="hidden" name="user_id" value="<?php echo $_SESSION['id'] ?>">
+										<input type="hidden" name="follow">
+										<div  class="block b-gray border-5 t-p-5 b-p-5 txt-hover-white t-p-5 bg-blue txt-white follow" onclick="document.getElementById('form').submit();">Takip Et</div>
+
+										
+										</a>
+									</div>
+									
+								</div>
+
+
+								
+							<?php } ?>
+
+
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-
-<!-- 
+<!--
 			<div class="row bg-light-gray b-p-15 t-p-15 none show-hide">
 				<div class="clearfix">
 					<span class="pull-left mali r-m-10 l-m-10 l-p-5">Önerilenler</span>
@@ -153,34 +167,32 @@ $listfollow -> execute(array(
 				<div class="col-md-12 col-xs-12 lato t-m-10 owl-carousel fa-times-par">
 
 					<?php while ($oneriallResponse = $oneriall -> fetch(PDO::FETCH_ASSOC)) {?>
-						<a href="profils.php?id=<?php echo $oneriallResponse['id'] ?>">
-							<div class="invite-div text-center bg-white remove">
+						<div class="invite-div text-center bg-white remove">
+							<a href="profils.php?id=<?php echo $oneriallResponse['id'] ?>">
 								<div class="t-p-10 r-m-10">
 									<i class="fal fa-times position-r pull-right"></i> 
 								</div>
 								<figure class="status-img border-50 m-auto">
-									<img src="img <?php echo $oneriallResponse['img'] ?>" alt="bird" class="img-responsive">
+									<img src="img <?php echo $oneriallResponse['img'] ?>"  class="img-responsive">
 								</figure>
 								<h5 class="text-capitalize t-p-5 b-p-5"><strong><?php echo $oneriallResponse['name']. 
 								"&nbsp;".$oneriallResponse['surname'];?></strong></h5>
 
-
-							</div>
-						</a>
+							</a>
+						</div>
 						<?php
 					} ?>
 
 				</div>
 			</div>
-		-->
 
+		-->
 		<div class="row">
 			<div class="col-md-12 col-xs-12 col-sm-12">
 				<h5 class="text-capitalize t-p-5 b-p-5"><strong><p><u><?php echo $userResponse['name']. 
 				"&nbsp;".$userResponse['surname'];?></u></p></strong></h5>
 
 				<h5 class="text-capitalize t-p-5 b-p-5"><strong><p><u><?php echo $userResponse['bio']; ?></u></p></strong></h5>
-
 			</div>
 		</div>
 
@@ -209,12 +221,13 @@ $listfollow -> execute(array(
 <!-- home search icon alttaki -->
 <?php include 'footer.php' ?>
 
-
+<!-- kaldır  -->
 <div class="modal fade first-modal " tabindex="-1" role="dialog">
 	<div class="modal-dialog modal-sm modal-dialog-center" role="document">
 		<div class="modal-content ">
 			<ul class="list-unstyled mali l-m-10 r-m-10 t-m-10 b-m-10">
-				<li class="t-p-5 b-p-5 txt-hover-black"><a href="logout.php" class="txt-black block">Çıkış Yap</a></li>
+				<li class="txt-hover-black t-p-5 b-p-5"><a href="logout.php" class="txt-black block">Çıkış</a></li>
+
 			</ul>
 		</div>
 	</div>
@@ -243,8 +256,8 @@ $listfollow -> execute(array(
 
 				<div class="modal-body modal-body-act o-hidden">
 					<?php while ($listfollowResp = $listfollow -> fetch(PDO::FETCH_ASSOC)) {?>
-						<a href="profils.php?id=<?php echo $listfollowResp['id'] ?>">
-							<div class="row b-p-10">
+						<div class="row b-p-10">
+							<a href="profils.php?id=<?php echo $listfollowResp['id'] ?>">
 								<div class="col-md-10 col-xs-9 col-sm-10 clearfix">
 									<div class="avatar-img border-50 border-colored border-white pull-left comment-photo-w">
 										<figure>
@@ -256,11 +269,9 @@ $listfollow -> execute(array(
 										"&nbsp;".$listfollowResp['surname']?></strong></h5>
 
 									</div>
-
 								</div>
-
-							</div>
-						</a>
+							</a>
+						</div>
 					<?php 	} ?>
 				</div> 
 
@@ -270,27 +281,7 @@ $listfollow -> execute(array(
 	</div>
 </div>
 
-
-
-
-
-<div class="modal fade second-modal" tabindex="-1" role="dialog">
-	<div class="modal-dialog modal-sm" role="document">
-		<div class="modal-content">
-			<ul class="list-unstyled l-m-10 r-m-10 t-m-10 b-m-10 mali">
-				<li class="t-p-5 b-p-5 txt-hover-black"><a href="logout.php" class="txt-black block">Çıkış Yap</a></li>
-				
-			</ul>
-		</div>
-	</div>
-</div>
-
-
-
-
-
-
-<!-- 
+<!--
 	<div class="position-r">
 		<div class="modal modal-act fade suggested" tabindex="-1" role="dialog">
 			<div class="modal-dialog modal-dialog-act modal-lg" role="document">
@@ -308,15 +299,15 @@ $listfollow -> execute(array(
 							</div>
 						</div>
 					</div>
-	
+
 					<div class="modal-body modal-body-act o-hidden">
 						<?php while ($ores = $oneri -> fetch(PDO::FETCH_ASSOC)) {?>
-							<a href="profils.php?id=<?php echo $ores['id'] ?>">
+							<a href="profils.php?id=<?php echo $oneriallResponse['id'] ?>">
 								<div class="row b-p-10">
 									<div class="col-md-10 col-xs-9 col-sm-10 clearfix">
 										<div class="avatar-img border-50 border-colored border-white pull-left comment-photo-w">
 											<figure>
-												<img src="img <?php echo $ores['img'] ?> " alt="bird" class="img-responsive">
+												<img src="img <?php echo $ores['img']?>" alt="bird" class="img-responsive">
 											</figure>
 										</div>
 										<div class="pull-left l-m-10 comment-txt-w">
@@ -325,7 +316,6 @@ $listfollow -> execute(array(
 
 										</div>
 									</div>
-
 								</div>
 							</a>
 							<?php
@@ -344,7 +334,5 @@ $listfollow -> execute(array(
 
 
 
-
 </html>
 </form>
-

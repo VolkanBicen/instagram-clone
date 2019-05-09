@@ -1,6 +1,4 @@
 
-<!doctype html>
-<html lang="en" ng-app>
 <head>
 
     <meta charset="utf-8">
@@ -34,7 +32,7 @@
                 <?php if ($_GET['error_code']=="01")
                 {?>
 
-                 <b style="color:red;">İşlem Başarısız.Veritabanı Hatası</b>
+                 <b style="color:red;">Sunucu Hatası</b>
              <?php }
 
              elseif ($_GET['error_code']=="02"){?>
@@ -61,7 +59,7 @@
                </div>
 
                <div class="form-group">
-                   <input type="text" name="userName"  class="form-control" placeholder="Kullanıcı Adınız" required autofocus/>
+                   <input type="text" name="username"  class="form-control" placeholder="Kullanıcı Adınız" required autofocus/>
                </div>
 
                <div class="form-group">
@@ -91,7 +89,7 @@
 
 
 </body>
-</html>
+
 <div id="footerContent">
   <?php
   include 'footer.php';  ?>
