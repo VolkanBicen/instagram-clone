@@ -3,27 +3,30 @@ ob_start();
 session_start();
 include 'baglan.php';
 include 'header.php';
+
 $user=$db -> prepare("SELECT * FROM user WHERE id=:id");
 $user -> execute(array(
 	'id' => $_SESSION['id'],
 ));
-
 $userResponse = $user -> fetch(PDO::FETCH_ASSOC);
-
-$oneri=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id =:id");
-$oneri -> execute(array(
-	'id'=> $_SESSION['id'],
-));
-
-$oneriall=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id=:id)");
-$oneriall -> execute(array(
-	'id'=> $_SESSION['id'],
-));
 
 $posts=$db -> prepare("SELECT * FROM posts WHERE user_id=:id");
 $posts -> execute(array(
 	'id' => $_SESSION['id'],
 ));
+
+
+
+$oneri=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id =:id");
+$oneri -> execute(array(
+	'id'=> $_SESSION['id'],
+));
+$oneriall=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id=:id)");
+$oneriall -> execute(array(
+	'id'=> $_SESSION['id'],
+));
+
+
 
 $countposts=$db -> prepare("SELECT count(*) as gonderi FROM posts WHERE user_id=:id");
 $countposts -> execute(array(
@@ -71,19 +74,14 @@ $listfollow -> execute(array(
 		</div>
 	</div>
 
-
-
 	<div class="">
 		<div class="container container-insta">
-
 			<div class="row t-p-15 b-p-15">
 				<div class="col-md-3 col-xs-4 col-sm-4">
 					<div class="o-hidden txt-hover-blue decor-none m-auto text-center profil-photo border-50">
-
 						<figure class="">
-							<img src="img<?php echo  $userResponse['img'] ?>" alt="bird" class="img-responsive">
+							<img src="img<?php echo  $userResponse['img'] ?>"  class="img-responsive">
 						</figure>
-
 					</div>
 				</div>
 
@@ -121,15 +119,6 @@ $listfollow -> execute(array(
 									</a>
 								</div>
 
-								<?php if ($_SESSION['id']!= $userResponse['id']){ ?>
-
-									<div class="col-md-2 col-xs-3 text-center decor-none txt-hover-black h-30 l-p-0 r-p-0 l-p-5 r-p-5 user-check-div">
-										<span href="#" class="txt-black block b-gray border-5 t-p-5 b-p-5 pointer user-check" data-toggle="modal" data-target="#unf-modal">
-											<i class="far fa-user f-s-16"></i>
-										</span>
-									</div>
-
-								<?php } ?>
 <!--
 								<div class="col-md-2 col-xs-3 text-center h-30 l-p-0">
 									<span class="block b-gray border-5 t-p-5 txt-black txt-hover-black b-p-5 pointer down">
@@ -183,8 +172,7 @@ $listfollow -> execute(array(
 
 			</div>
 		</div>
-
-
+		
 		<div class="row b-m-55 " id="th-div">
 			<div class="col-md-12">
 				<div class="row">
@@ -193,7 +181,7 @@ $listfollow -> execute(array(
 						<div class="col-md-4 col-xs-4 border-profil l-p-0 r-p-0 o-hidden" data-toggle="modal" data-target=".show-img">
 
 							<figure>
-								<a href="showpost.php?id=<?php echo $postsResponse['post_id'] ?>">
+								<a href="showpost.php?post_id=<?php echo $postsResponse['post_id']?>">
 									<img src="posts <?php echo $postsResponse['post_img']; ?> " class="img-responsive2">
 								</a>
 							</figure>
@@ -203,6 +191,8 @@ $listfollow -> execute(array(
 				</div>
 			</div>
 		</div>
+
+
 
 	</div>
 </div>

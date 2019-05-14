@@ -3,7 +3,6 @@ ob_start();
 session_start();
 include 'baglan.php';
 
-
 if (isset($_POST ['register'])) {
 	
 	$email=($_POST['email']);
@@ -12,29 +11,20 @@ if (isset($_POST ['register'])) {
 	$username=($_POST['username']);
 	$password=($_POST['password']);
 	$password_tekrar=($_POST['password_tekrar']);
-
-
 	$register=$db->prepare("select * from user where email=:email or username=:username");
 	$register->execute(array(
 		'email' => $email,
 		'username' => $username,
 	));
-
 	$say=$register->rowCount();
-
-
 	if ($password==$password_tekrar && $say==0) {
-
 		$password=md5($password);
-
 		$kullanicikaydet=$db->prepare("INSERT INTO user SET
-
 			email=:email,
 			name=:name,
 			surname=:surname,
 			username=:username,
 			password=:password
-
 			");
 		$insert=$kullanicikaydet->execute(array(
 			'email' => $email,
@@ -42,9 +32,7 @@ if (isset($_POST ['register'])) {
 			'surname' => $surname,
 			'username' => $username,
 			'password' => $password,
-
 		));
-
 		if ($insert) {
 			header("Location:login.php");
 			exit();
@@ -53,21 +41,16 @@ if (isset($_POST ['register'])) {
 			header("Location:register.php?error_code=01"); 
 			exit();
 		}
-
-
 	}
 	else{
 		header("Location:register.php?error_code=02"); 
 		exit();
 	}
-
 }
 
 if (isset($_POST['giris'])) {
-
 	$email=($_POST['email']);
 	$password=md5($_POST['password']);
-
 	$giris=$db->prepare("SELECT * FROM user WHERE email=:email and 
 		password=:password ");
 	$giris -> execute(array(
@@ -79,34 +62,26 @@ if (isset($_POST['giris'])) {
 	$girissayac=$giris->rowCount();
 	if($girissayac==1){	
 		$_SESSION['id']=$girisResponse['id'];
-
 		header("Location:profil.php");
 		exit();
-
 	}
-
-	else{
-		
+	else{	
 		header("Location:login.php?error_code=03");
 		exit();
 	}
-
 }
 
 
 
 if (isset($_POST['kaydet'])) {
 	$id=$_SESSION['id'];
-
 	$img = $_FILES['dosya']["name"];
 	$benzersizsayi1=rand(20000,32000);
 	$benzersizsayi2=rand(20000,32000);
 	$benzersizad=$benzersizsayi1.$benzersizsayi2;
-
 	$dizin = 'img/';
 	$yuklenecek_dosya = $dizin .$benzersizad .basename($_FILES['dosya']['name']);
 	$kullanici_fotoyol="/".$benzersizad.$img;
-
 	if (move_uploaded_file($_FILES['dosya']['tmp_name'], $yuklenecek_dosya))
 	{
 		$guncelle=$db->prepare("UPDATE user SET 
@@ -122,7 +97,6 @@ if (isset($_POST['kaydet'])) {
 			'email' => $_POST['email'],
 			'bio' => $_POST['bio'],
 			'img'=> $kullanici_fotoyol,
-
 		));
 		if($update){
 			Header("Location:profil.php");
@@ -130,9 +104,7 @@ if (isset($_POST['kaydet'])) {
 		}else{
 			Header("Location:profil.php?error_code=02");
 			exit();
-
 		}
-
 	}
 	else  {
 		$guncelle=$db->prepare("UPDATE user SET 
@@ -147,8 +119,6 @@ if (isset($_POST['kaydet'])) {
 			'surname' => $_POST['surname'],
 			'email' => $_POST['email'],
 			'bio' => $_POST['bio'],
-			
-
 		));
 		if($update){
 			Header("Location:profil.php");
@@ -156,10 +126,8 @@ if (isset($_POST['kaydet'])) {
 		}else{
 			Header("Location:profil.php?error_code=02");
 			exit();
-
 		}
 	}
-
 }
 
 if (isset($_POST['unf'])) {

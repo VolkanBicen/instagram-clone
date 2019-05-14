@@ -9,6 +9,18 @@ $user -> execute(array(
 ));
 $userResponse = $user -> fetch(PDO::FETCH_ASSOC);
 
+$posts=$db -> prepare("SELECT * FROM posts WHERE user_id=:id");
+$posts -> execute(array(
+	'id' => $_GET['id'],
+));
+
+$followme=$db->prepare("SELECT * from follow WHERE target_id=:id and user_id=:user_id ");
+$followme -> execute(array(
+	'id' =>$_GET['id'],
+	'user_id'=>$_SESSION['id']
+));
+$followmeResp = $followme -> fetch(PDO::FETCH_ASSOC);
+
 $oneri=$db -> prepare("SELECT * from user where id!=:id and id!=(SELECT target_id from follow where user_id=:id )");
 $oneri -> execute(array(
 	'id'=> $_GET['id'],
@@ -19,10 +31,6 @@ $oneriall -> execute(array(
 	'id'=>$_GET['id'],
 ));
 
-$posts=$db -> prepare("SELECT * FROM posts WHERE user_id=:id");
-$posts -> execute(array(
-	'id' => $_GET['id'],
-));
 
 $countposts=$db -> prepare("SELECT count(*) as gonderi FROM posts WHERE user_id=:id");
 $countposts -> execute(array(
@@ -42,12 +50,7 @@ $followers -> execute(array(
 ));
 $followersRes = $followers -> fetch(PDO::FETCH_ASSOC);
 
-$followme=$db->prepare("SELECT * from follow WHERE target_id=:id and user_id=:user_id ");
-$followme -> execute(array(
-	'id' =>$_GET['id'],
-	'user_id'=>$_SESSION['id']
-));
-$followmeResp = $followme -> fetch(PDO::FETCH_ASSOC);
+
 
 ?>
 
@@ -126,14 +129,9 @@ $followmeResp = $followme -> fetch(PDO::FETCH_ASSOC);
 										<input type="hidden" name="user_id" value="<?php echo $_SESSION['id'] ?>">
 										<input type="hidden" name="unf">
 										<div style="color:black;" class="block b-gray border-5 t-p-5 b-p-5  txt-hover-white" onclick="document.getElementById('form').submit();">Takip Ediliyor</div>
-
-										
 									</div>
-
 								</div>
-
 							<?php } else { ?>
-
 								<div class="row profil-top-p">
 									<div class="col-md-8 col-xs-6 text-center decor-none txt-hover-black h-30 r-p-0 message-div ">
 
@@ -141,17 +139,13 @@ $followmeResp = $followme -> fetch(PDO::FETCH_ASSOC);
 										<input type="hidden" name="user_id" value="<?php echo $_SESSION['id'] ?>">
 										<input type="hidden" name="follow">
 										<div  class="block b-gray border-5 t-p-5 b-p-5 txt-hover-white t-p-5 bg-blue txt-white follow" onclick="document.getElementById('form').submit();">Takip Et</div>
-
 										
 										</a>
 									</div>
 									
 								</div>
-
-
 								
 							<?php } ?>
-
 
 						</div>
 					</div>
@@ -205,7 +199,7 @@ $followmeResp = $followme -> fetch(PDO::FETCH_ASSOC);
 						<div class="col-md-4 col-xs-4 border-profil l-p-0 r-p-0 o-hidden" data-toggle="modal" data-target=".show-img">
 
 							<figure>
-								<a href="showpost.php?id=<?php echo $postsResponse['post_id'] ?>">
+								<a href="showpost.php?post_id=<?php echo $postsResponse['post_id'] ?>">
 									<img src="posts <?php echo $postsResponse['post_img']; ?> " class="img-responsive2">
 								</a>
 							</figure>
